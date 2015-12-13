@@ -1,12 +1,21 @@
 import React, {Component} from 'react';
+import Rebase from 're-base';
+import ReactDOM from 'react-dom';
+import Message from './messages';
+
+const base = Rebase.createClass('https://andiawesome-react-chat.firebaseio.com/');
 
 export default class App extends Component {
 
   constructor(props) {
     super(props);
+
     this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
     this.state = {
-      message: 'Hello world'
+      input: 'hello', // the value of the input field
+      username: '', // get username from user
+      messages: [] // the array of messages
     };
   }
 
@@ -15,7 +24,14 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    console.log('componentDidMount');
+    base.syncState('chatList', {
+      context: this,
+      state: 'messages',
+      asArray: true
+    });
+
+    var username = prompt('Gimme your name, yo!');
+    this.setState({username});
   }
 
   componentWillReceiveProps(nextProps) {
@@ -40,22 +56,43 @@ export default class App extends Component {
   }
 
   render() {
+    let messages = this.state.messages.map((message, idx) => (
+      <Message key={idx} {...message} />
+    ));
+
     return (
       <div id="helloWorld">
+        <ul style={{listStyleType: 'none', margin: '5px 0', padding: '0', width: '500px'}}>
+          {messages}
+        </ul>
         <input
           id="input"
           name="message"
           type="text"
-          onChange={this.handleChange}
-          value={this.state.message}
-        />
-      <div id="display" style={{color: 'grey', fontSize: 35}}>{this.state.message}</div>
+          value={this.state.input}
+          onChange={this.handleChange} />
+        <button
+          onClick={this.handleSubmit}>Submit</button>
       </div>
     );
   }
 
   handleChange(event) {
-    this.setState({message: event.target.value});
+    console.log(event.target.value)
+    this.setState({input: event.target.value});
+  }
+
+  handleSubmit(event) {
+      event.preventDefault();
+      if (this.state.input == '') return;
+
+      let time = new Date();
+      let thisTime = `${time.getHours()}:${time.getMinutes()}`;
+
+      this.setState({
+        messages: this.state.messages.concat({username: this.state.username, text: this.state.input, time: thisTime}),
+        input: ''
+      });
   }
 
 }
