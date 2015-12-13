@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import Rebase from 're-base';
 import ReactDOM from 'react-dom';
+import ReactCSSTransitionGroup from 'react-addons-css-transition-group';
 import Message from './messages';
 
 const base = Rebase.createClass('https://andiawesome-react-chat.firebaseio.com/');
@@ -11,7 +12,7 @@ export default class App extends Component {
     super(props);
 
     this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleOnKeyDown = this.handleOnKeyDown.bind(this);
     this.state = {
       input: 'hello', // the value of the input field
       username: '', // get username from user
@@ -61,8 +62,8 @@ export default class App extends Component {
     ));
 
     return (
-      <div id="helloWorld">
-        <ul style={{listStyleType: 'none', margin: '5px 0', padding: '0', width: '500px'}}>
+      <div className="container">
+        <ul id="list">
           {messages}
         </ul>
         <input
@@ -70,9 +71,8 @@ export default class App extends Component {
           name="message"
           type="text"
           value={this.state.input}
-          onChange={this.handleChange} />
-        <button
-          onClick={this.handleSubmit}>Submit</button>
+          onChange={this.handleChange}
+          onKeyDown={this.handleOnKeyDown} />
       </div>
     );
   }
@@ -82,7 +82,9 @@ export default class App extends Component {
     this.setState({input: event.target.value});
   }
 
-  handleSubmit(event) {
+  handleOnKeyDown(event) {
+    if (event.key === 'Enter') {
+
       event.preventDefault();
       if (this.state.input == '') return;
 
@@ -93,6 +95,7 @@ export default class App extends Component {
         messages: this.state.messages.concat({username: this.state.username, text: this.state.input, time: thisTime}),
         input: ''
       });
+    }
   }
 
 }
